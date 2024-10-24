@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anderson Scientific</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            transition: background-color 0.5s;
+        }
+
+        h1 {
+            font-size: 48px;
+            text-align: center;
+            text-shadow: 0 0 20px white;
+            margin-bottom: 5px;
+        }
+
+        h2 {
+            font-size: 20px;
+            text-align: center;
+            color: lightgray;
+        }
+
+        .access-denied {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        input {
+            border: 2px solid white;
+            padding: 10px;
+            font-size: 18px;
+            border-radius: 5px;
+            outline: none;
+            margin-bottom: 20px;
+            background-color: black;
+            color: white;
+        }
+
+        input::placeholder {
+            color: white;
+            opacity: 0.7;
+        }
+
+        .news-ticker {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            position: absolute;
+            bottom: 60px;
+            animation: ticker 20s linear infinite;
+            color: white;
+        }
+
+        .news-text {
+            display: inline-block;
+            padding-left: 100%;
+        }
+
+        @keyframes ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .year {
+            font-size: 36px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        .message {
+            font-size: 24px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .loading {
+            width: 100%;
+            height: 20px;
+            background-color: lightgray;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+            position: relative;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: green;
+            width: 0%;
+            transition: width 3s;
+        }
+
+        .info {
+            font-size: 18px;
+            color: white;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        #countdown {
+            font-size: 36px;
+            color: black;
+            margin-top: 20px;
+        }
+
+        .warning {
+            font-size: 24px;
+            color: red;
+            position: absolute;
+            bottom: 20px;
+        }
+
+        #boringMessage, #podvalMessage, #williamMessage {
+            font-size: 24px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="title">ANDERSON SCIENTIFIC</h1>
+    <h2>Ran by Anderson Teller</h2>
+    <div id="accessDenied" class="access-denied hidden">Извините, ваш низкий уровень доступа, не дает право раскрывать данные</div>
+    <input type="text" id="inputField" placeholder="CODE">
+    
+    <div class="news-ticker">
+        <div class="news-text">
+            Anderson Scientific был основан в 1931 году Андерсоном Теллером в поддержке правительства США как шаг к развитию человечества, за эти годы компания получила несколько званий как одна из лучших организаций по развитию страны, и помните все что у вас есть создано нами.
+        </div>
+    </div>
+
+    <div id="years" class="hidden">
+        <div class="year" onclick="showMessage('1931')">1931</div>
+        <div class="year" onclick="showMessage('1967')">1967</div>
+        <div class="year" onclick="showMessage('1992')">1992</div>
+    </div>
+
+    <div id="message" class="message hidden"></div>
+    <div id="loading" class="loading hidden">
+        <div id="progressBar" class="progress"></div>
+    </div>
+
+    <div id="info" class="info hidden"></div>
+    <div id="countdown" class="hidden"></div>
+    <div class="warning hidden">ДАННЫЕ РАСКРЫТЫ, ИНФОРМАЦИЯ УДАЛЯЕТСЯ</div>
+    <div id="boringMessage">Недавно я купил дом в Боринге, и не жалею об этом, Маргарет подвергла сомнению мою идею, но я стоял на своем. Я через неделю попрошу финансирование у правительства, надеюсь все будет хорошо.</div>
+    <div id="podvalMessage">Вселенная удалена, но две личности проскочили в другую вселенную, один из них старик, голос которого похож на голос ребенка который пытается изображать старика.</div>
+    <div id="williamMessage" style="display:none;">ФИО-Уильям Куперман<br>
+        Возраст-77<br>
+        Диагноз-Альцгеймер<br>
+        Родной город-Боринг<br>
+        Нахождение на данный момент-Порт-Ленд, Дом престарелых имени Гувера.<br><br>
+        Об пациенте: Является сыном одного из основателей компании, Альцгеймер поразил весь его мозг, на данный момент он не способен выполнять базовые действия.</div>
+
+    <script>
+        const inputField = document.getElementById('inputField');
+        const title = document.getElementById('title');
+        const yearsDiv = document.getElementById('years');
+        const messageDiv = document.getElementById('message');
+        const loadingDiv = document.getElementById('loading');
+        const progressBar = document.getElementById('progressBar');
+        const infoDiv = document.getElementById('info');
+        const countdownDiv = document.getElementById('countdown');
+        const warningDiv = document.querySelector('.warning');
+        const boringMessage = document.getElementById('boringMessage');
+        const podvalMessage = document.getElementById('podvalMessage');
+        const williamMessage = document.getElementById('williamMessage');
+        const accessDeniedDiv = document.getElementById('accessDenied');
+
+        inputField.addEventListener('keyup', () => {
+            const value = inputField.value.trim();
+
+            // Скрыть сообщение о низком доступе при каждом новом вводе
+            accessDeniedDiv.classList.add('hidden');
+
+            if (value === 'Geogib' || value === 'Kuperman' || value === 'Fox' || value === 'BILLCIFR100' || value === 'Vazgen') {
+                loadingDiv.classList.remove('hidden');
+                progressBar.style.width = '0%';
+
+                setTimeout(() => {
+                    loadingDiv.classList.add('hidden');
+
+                    if (value === 'Geogib') {
+                        title.classList.add('hidden');
+                        yearsDiv.classList.remove('hidden');
+                        inputField.classList.add('hidden');
+                        messageDiv.classList.add('hidden');
+                        infoDiv.classList.add('hidden');
+                    } else if (value === 'Kuperman') {
+                        alert('Слежка установлена');
+                        inputField.value = '';
+                    } else if (value === 'Fox') {
+                        alert('Расса Человеко-Лисов, очень мирные');
+                        inputField.value = '';
+                    } else if (value === 'BILLCIFR100') {
+                        infoDiv.innerText = 'Это вообще кто?';
+                        infoDiv.classList.remove('hidden');
+                        inputField.value = '';
+                    } else if (value === 'Vazgen') {
+                        infoDiv.innerText = 'Вазген следи за бомжом который убежал';
+                        infoDiv.classList.remove('hidden');
+                        inputField.value = '';
+                    }
+                }, 3000);
+            } else if (value === 'Chrysolite') {
+                accessDeniedDiv.classList.remove('hidden');
+                inputField.value = '';
+            } else if (value === '163') {
+                document.body.style.backgroundColor = 'red';
+                title.classList.add('hidden');
+                yearsDiv.classList.add('hidden');
+                inputField.classList.add('hidden');
+                messageDiv.classList.add('hidden');
+                infoDiv.classList.add('hidden');
+                loadingDiv.classList.add('hidden');
+                
+                startCountdown(163);
+                warningDiv.classList.remove('hidden');
+            } else if (value === 'Boring') {
+                title.classList.add('hidden');
+                yearsDiv.classList.add('hidden');
+                inputField.classList.add('hidden');
+                loadingDiv.classList.add('hidden');
+                messageDiv.classList.add('hidden');
+                infoDiv.classList.add('hidden');
+                
+                boringMessage.style.display = 'block';
+                let opacity = 0;
+                boringMessage.style.opacity = opacity;
+
+                const fadeIn = setInterval(() => {
+                    if (opacity < 1) {
+                        opacity += 0.05;
+                        boringMessage.style.opacity = opacity;
+                    } else {
+                        clearInterval(fadeIn);
+                    }
+                }, 50);
+                inputField.value = '';
+            } else if (value === 'Podval') {
+                title.classList.add('hidden');
+                yearsDiv.classList.add('hidden');
+                inputField.classList.add('hidden');
+                loadingDiv.classList.add('hidden');
+                messageDiv.classList.add('hidden');
+                infoDiv.classList.add('hidden');
+
+                podvalMessage.style.display = 'block';
+                podvalMessage.style.opacity = 0;
+                let opacity = 0;
+                const fadeIn = setInterval(() => {
+                    if (opacity < 1) {
+                        opacity += 0.05;
+                        podvalMessage.style.opacity = opacity;
+                    } else {
+                        clearInterval(fadeIn);
+                    }
+                }, 50);
+                inputField.value = '';
+            } else if (value === 'William') {
+                title.classList.add('hidden');
+                yearsDiv.classList.add('hidden');
+                inputField.classList.add('hidden');
+                loadingDiv.classList.add('hidden');
+                messageDiv.classList.add('hidden');
+                infoDiv.classList.add('hidden');
+
+                williamMessage.style.display = 'block';
+                let opacity = 0;
+                williamMessage.style.opacity = opacity;
+
+                const fadeIn = setInterval(() => {
+                    if (opacity < 1) {
+                        opacity += 0.05;
+                        williamMessage.style.opacity = opacity;
+                    } else {
+                        clearInterval(fadeIn);
+                    }
+                }, 50);
+                inputField.value = '';
+            }
+
+            // Запускаем загрузку для всех остальных введенных слов
+            if (value === 'Geogib' || value === 'Kuperman' || value === 'Fox' || value === 'BILLCIFR100' || value === 'Vazgen' || value === 'Boring' || value === 'Podval' || value === 'William') {
+                let progress = 0;
+                progressBar.style.width = '0%';
+                const interval = setInterval(() => {
+                    progress += 5;
+                    progressBar.style.width = `${progress}%`;
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                    }
+                }, 300);
+            }
+        });
+
+        function startCountdown(minutes) {
+            let timeRemaining = minutes * 60;
+            countdownDiv.classList.remove('hidden');
+            
+            const countdownInterval = setInterval(() => {
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                countdownDiv.innerText = `Осталось времени: ${minutes} мин ${seconds < 10 ? '0' : ''}${seconds} сек`;
+
+                if (timeRemaining <= 0) {
+                    clearInterval(countdownInterval);
+                    countdownDiv.innerText = 'Время истекло!';
+                }
+
+                timeRemaining--;
+            }, 1000);
+        }
+
+        function showMessage(year) {
+            messageDiv.classList.remove('hidden');
+            if (year === '1931') {
+                messageDiv.innerText = 'Компания была основана [][][][][][][][][] Куперманом и Андерсоном Теллером в 1931 году.';
+            } else if (year === '1967') {
+                messageDiv.innerText = 'Аномальный инцидент из-за экспериментов “Anderson scientific” привел к тому, что весь штат Вашингтон где был главный центр компании стал непроницаемым. Люди, пытающиеся попасть внутрь штата, как будто автоматически возвращаются на точку входа или оказываются снаружи, даже не понимая, что произошло. Это явление было названо «Петля Вашингтона». Поняв, что штат оказался изолирован аномальным способом, правительство немедленно начало действовать в рамках двух главных задач: удержать контроль над ситуацией и предотвратить панику среди населения. Это включает несколько ключевых шагов: 1. Информационная блокада и дезинформация. 2. Изоляция территории. 3. Военное оцепление.';
+            } else if (year === '1992') {
+                messageDiv.innerText = 'Информация по этому году отсутствует.';
+            }
+        }
+    </script>
+</body>
+</html>
